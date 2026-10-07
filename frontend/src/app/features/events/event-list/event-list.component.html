@@ -1,0 +1,69 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Etkinlikler</h1>
+    <p>Mevcut tüm etkinlikleri keşfedin</p>
+  </div>
+
+  <div class="filters">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Etkinlik Ara</mat-label>
+      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()" placeholder="Etkinlik veya mekan adı..." />
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="status-field">
+      <mat-label>Durum</mat-label>
+      <mat-select [(ngModel)]="selectedStatus" (ngModelChange)="applyFilter()">
+        @for (opt of statusOptions; track opt.value) {
+          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (loading) {
+    <app-loading-spinner></app-loading-spinner>
+  } @else if (filteredEvents.length === 0) {
+    <app-empty-state
+      icon="event_busy"
+      title="Etkinlik bulunamadı"
+      message="Arama kriterlerinize uygun etkinlik yok."
+    ></app-empty-state>
+  } @else {
+    <div class="events-grid">
+      @for (event of filteredEvents; track event.id) {
+        <mat-card class="event-card" [class.inactive]="event.status !== 'ACTIVE'">
+          <div class="event-status-badge" [ngClass]="'status-' + event.status.toLowerCase()">
+            {{ getStatusLabel(event.status) }}
+          </div>
+          <mat-card-header>
+            <mat-card-title>{{ event.name }}</mat-card-title>
+            <mat-card-subtitle>
+              <mat-icon>location_on</mat-icon> {{ event.venueName }}
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="event-description">{{ event.description }}</p>
+            <div class="event-meta">
+              <span class="meta-item">
+                <mat-icon>schedule</mat-icon>
+                {{ event.startDateTime | date:'dd MMM yyyy, HH:mm' }}
+              </span>
+            </div>
+          </mat-card-content>
+          <mat-card-actions>
+            @if (event.status === 'ACTIVE') {
+              <a mat-raised-button color="primary" [routerLink]="['/events', event.id]">
+                Detay & Koltuk Seç
+              </a>
+            } @else {
+              <a mat-stroked-button [routerLink]="['/events', event.id]">
+                Detayları Gör
+              </a>
+            }
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

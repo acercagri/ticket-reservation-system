@@ -1,0 +1,105 @@
+@if (loading) {
+  <app-loading-spinner></app-loading-spinner>
+} @else if (event) {
+  <div class="page-container">
+    <div class="event-header">
+      <div class="event-info">
+        <div class="status-badge" [ngClass]="'status-' + event.status.toLowerCase()">
+          {{ getStatusLabel(event.status) }}
+        </div>
+        <h1>{{ event.name }}</h1>
+        <div class="meta-row">
+          <span><mat-icon>location_on</mat-icon> {{ event.venueName }}</span>
+          <span><mat-icon>schedule</mat-icon> {{ event.startDateTime | date:'dd MMMM yyyy, HH:mm' }}</span>
+        </div>
+        <p class="description">{{ event.description }}</p>
+      </div>
+    </div>
+
+    @if (event.status === 'ACTIVE') {
+      <div class="seat-section">
+        <h2>Koltuk Seçimi</h2>
+
+        <div class="seat-legend">
+          <span class="legend-item"><span class="dot available"></span> Müsait</span>
+          <span class="legend-item"><span class="dot reserved"></span> Rezerve</span>
+          <span class="legend-item"><span class="dot sold"></span> Satıldı</span>
+          <span class="legend-item"><span class="dot selected"></span> Seçildi</span>
+        </div>
+
+        <div class="stage-label">SAHNE</div>
+
+        <div class="seat-map">
+          @for (row of rows; track row) {
+            <div class="seat-row">
+              <span class="row-label">{{ row }}</span>
+              <div class="seats">
+                @for (seat of getSeatsForRow(row); track seat.id) {
+                  <button
+                    class="seat-btn"
+                    [class.available]="seat.status === 'AVAILABLE' && !selectedSeatIds.has(seat.id)"
+                    [class.reserved]="seat.status === 'RESERVED'"
+                    [class.sold]="seat.status === 'SOLD'"
+                    [class.selected]="selectedSeatIds.has(seat.id)"
+                    [disabled]="seat.status !== 'AVAILABLE'"
+                    (click)="toggleSeat(seat)"
+                    [title]="'Sıra ' + seat.rowName + ' - Koltuk ' + seat.seatNumber + ' (' + seat.price + ' ₺)'"
+                  >
+                    {{ seat.seatNumber }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (selectedSeats.length > 0) {
+          <mat-card class="selection-summary">
+            <mat-card-header>
+              <mat-card-title>Seçilen Koltuklar</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="selected-seats-list">
+                @for (seat of selectedSeats; track seat.id) {
+                  <div class="selected-seat-item">
+                    <span>Sıra {{ seat.rowName }} - Koltuk {{ seat.seatNumber }}</span>
+                    <span class="price">{{ seat.price | number:'1.2-2' }} ₺</span>
+                  </div>
+                }
+              </div>
+              <mat-divider></mat-divider>
+              <div class="total-row">
+                <span>Toplam (tahmini)</span>
+                <span class="total-price">{{ totalPrice | number:'1.2-2' }} ₺</span>
+              </div>
+              <p class="total-note">* Gerçek toplam backend tarafından hesaplanır.</p>
+            </mat-card-content>
+            <mat-card-actions>
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="createReservation()"
+                [disabled]="reserving"
+              >
+                @if (reserving) {
+                  <ng-container>
+                    <mat-icon>hourglass_empty</mat-icon> İşleniyor...
+                  </ng-container>
+                } @else {
+                  <ng-container>
+                    <mat-icon>bookmark_add</mat-icon> Rezervasyon Oluştur
+                  </ng-container>
+                }
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    } @else {
+      <div class="inactive-notice">
+        <mat-icon>info</mat-icon>
+        <p>Bu etkinlik şu an aktif değil. Koltuk seçimi yapılamaz.</p>
+      </div>
+    }
+  </div>
+}

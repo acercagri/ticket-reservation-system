@@ -1,0 +1,44 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Biletlerim</h1>
+  </div>
+
+  @if (loading) {
+    <app-loading-spinner></app-loading-spinner>
+  } @else if (tickets.length === 0) {
+    <app-empty-state
+      icon="local_activity"
+      title="Bilet bulunamadı"
+      message="Onaylanmış rezervasyonlarınıza ait biletler burada görünür."
+    ></app-empty-state>
+  } @else {
+    <div class="tickets-grid">
+      @for (ticket of tickets; track ticket.id) {
+        <div class="ticket-card" [class.cancelled]="ticket.status === 'CANCELLED'">
+          <div class="ticket-left">
+            <mat-icon class="ticket-icon">local_activity</mat-icon>
+          </div>
+          <div class="ticket-body">
+            <div class="ticket-status" [ngClass]="'status-' + ticket.status.toLowerCase()">
+              {{ getStatusLabel(ticket.status) }}
+            </div>
+            <h3>{{ ticket.eventName }}</h3>
+            <div class="ticket-meta">
+              <span><mat-icon>event_seat</mat-icon> Sıra {{ ticket.rowName }} – Koltuk {{ ticket.seatNumber }}</span>
+            </div>
+            <div class="ticket-code">
+              <mat-icon>qr_code</mat-icon>
+              <code>{{ ticket.ticketCode }}</code>
+            </div>
+          </div>
+          <div class="ticket-actions">
+            <a mat-icon-button [routerLink]="['/tickets', ticket.id]" title="Detay">
+              <mat-icon>open_in_new</mat-icon>
+            </a>
+          </div>
+          <div class="ticket-perforated"></div>
+        </div>
+      }
+    </div>
+  }
+</div>

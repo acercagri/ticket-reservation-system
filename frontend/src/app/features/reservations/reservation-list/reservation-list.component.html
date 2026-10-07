@@ -1,0 +1,74 @@
+<div class="page-container">
+  <div class="page-header">
+    <h1>Rezervasyonlarım</h1>
+  </div>
+
+  @if (loading) {
+    <app-loading-spinner></app-loading-spinner>
+  } @else if (reservations.length === 0) {
+    <app-empty-state
+      icon="bookmark_border"
+      title="Rezervasyon bulunamadı"
+      message="Henüz bir rezervasyon oluşturmadınız."
+    ></app-empty-state>
+  } @else {
+    <div class="reservations-list">
+      @for (res of reservations; track res.id) {
+        <mat-card class="reservation-card">
+          <div class="status-badge" [ngClass]="'status-' + res.status.toLowerCase()">
+            {{ getStatusLabel(res.status) }}
+          </div>
+
+          <mat-card-header>
+            <mat-card-title>{{ res.eventName }}</mat-card-title>
+            <mat-card-subtitle>Rezervasyon #{{ res.id }}</mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="info-grid">
+              <div class="info-item">
+                <mat-icon>calendar_today</mat-icon>
+                <span>{{ res.reservationDate | date:'dd MMM yyyy, HH:mm' }}</span>
+              </div>
+              <div class="info-item">
+                <mat-icon>payments</mat-icon>
+                <span class="amount">{{ res.totalAmount | number:'1.2-2' }} ₺</span>
+              </div>
+              @if (res.status === 'PENDING') {
+                <div class="info-item countdown">
+                  <mat-icon>timer</mat-icon>
+                  <span>Kalan süre: <strong>{{ countdowns.get(res.id) ?? '...' }}</strong></span>
+                </div>
+              }
+              @if (res.status === 'PENDING' && res.expiresAt) {
+                <div class="info-item">
+                  <mat-icon>event_busy</mat-icon>
+                  <span>Son ödeme: {{ res.expiresAt | date:'HH:mm' }}</span>
+                </div>
+              }
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            @if (res.status === 'PENDING') {
+              <a mat-raised-button color="primary" [routerLink]="['/reservations', res.id]">
+                <mat-icon>payment</mat-icon> Ödeme Yap
+              </a>
+              <button mat-stroked-button color="warn" (click)="cancelReservation(res.id)">
+                <mat-icon>cancel</mat-icon> İptal Et
+              </button>
+            }
+            @if (res.status === 'CONFIRMED') {
+              <a mat-raised-button color="accent" [routerLink]="['/tickets']">
+                <mat-icon>local_activity</mat-icon> Biletleri Gör
+              </a>
+            }
+            <a mat-button [routerLink]="['/reservations', res.id]">
+              <mat-icon>info</mat-icon> Detay
+            </a>
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

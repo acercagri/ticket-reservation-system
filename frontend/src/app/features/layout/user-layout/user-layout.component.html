@@ -1,0 +1,56 @@
+<mat-toolbar color="primary" class="navbar">
+  <a routerLink="/events" class="brand">
+    <mat-icon>confirmation_number</mat-icon>
+    <span>TicketApp</span>
+  </a>
+
+  @if (!isMobile) {
+    <nav class="nav-links">
+      <a mat-button routerLink="/events" routerLinkActive="active-link">
+        <mat-icon>event</mat-icon> Etkinlikler
+      </a>
+      <a mat-button routerLink="/reservations" routerLinkActive="active-link">
+        <mat-icon>bookmark</mat-icon> Rezervasyonlarım
+      </a>
+      <a mat-button routerLink="/tickets" routerLinkActive="active-link">
+        <mat-icon>local_activity</mat-icon> Biletlerim
+      </a>
+    </nav>
+    <span class="spacer"></span>
+    <button mat-button [matMenuTriggerFor]="userMenu">
+      <mat-icon>account_circle</mat-icon>
+      <span>{{ authService.getUsername() }}</span>
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #userMenu="matMenu">
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Çıkış Yap</span>
+      </button>
+    </mat-menu>
+  } @else {
+    <span class="spacer"></span>
+    <button mat-icon-button [matMenuTriggerFor]="mobileMenu">
+      <mat-icon>menu</mat-icon>
+    </button>
+    <mat-menu #mobileMenu="matMenu">
+      <a mat-menu-item routerLink="/events">
+        <mat-icon>event</mat-icon> Etkinlikler
+      </a>
+      <a mat-menu-item routerLink="/reservations">
+        <mat-icon>bookmark</mat-icon> Rezervasyonlarım
+      </a>
+      <a mat-menu-item routerLink="/tickets">
+        <mat-icon>local_activity</mat-icon> Biletlerim
+      </a>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="logout()">
+        <mat-icon>logout</mat-icon> Çıkış Yap
+      </button>
+    </mat-menu>
+  }
+</mat-toolbar>
+
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>

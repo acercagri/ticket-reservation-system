@@ -1,0 +1,90 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1>Etkinlikler</h1>
+    <button mat-raised-button color="primary" (click)="showForm = !showForm">
+      <mat-icon>{{ showForm ? 'close' : 'add' }}</mat-icon>
+      {{ showForm ? 'Formu Kapat' : 'Yeni Etkinlik' }}
+    </button>
+  </div>
+
+  @if (showForm) {
+    <mat-card class="form-card">
+      <mat-card-header><mat-card-title>Yeni Etkinlik</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Etkinlik Adı</mat-label>
+            <input matInput formControlName="name" />
+            @if (form.get('name')?.hasError('required') && form.get('name')?.touched) {
+              <mat-error>Zorunludur.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Mekan</mat-label>
+            <mat-select formControlName="venueId">
+              @for (v of venues; track v.id) {
+                <mat-option [value]="v.id">{{ v.name }} – {{ v.city }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Başlangıç Tarihi/Saati</mat-label>
+            <input matInput type="datetime-local" formControlName="startDateTime" />
+            @if (form.get('startDateTime')?.hasError('required') && form.get('startDateTime')?.touched) {
+              <mat-error>Zorunludur.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Durum</mat-label>
+            <mat-select formControlName="status">
+              @for (s of statusOptions; track s) {
+                <mat-option [value]="s">{{ getStatusLabel(s) }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-col">
+            <mat-label>Açıklama</mat-label>
+            <textarea matInput formControlName="description" rows="3"></textarea>
+            @if (form.get('description')?.hasError('required') && form.get('description')?.touched) {
+              <mat-error>Zorunludur.</mat-error>
+            }
+          </mat-form-field>
+          <div class="form-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || formLoading">Kaydet</button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading) {
+    <app-loading-spinner></app-loading-spinner>
+  } @else if (events.length === 0) {
+    <app-empty-state icon="event" title="Etkinlik yok" message="Henüz etkinlik oluşturulmamış."></app-empty-state>
+  } @else {
+    <mat-card class="table-card">
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="events">
+          <ng-container matColumnDef="id"><th mat-header-cell *matHeaderCellDef>#</th><td mat-cell *matCellDef="let e">{{ e.id }}</td></ng-container>
+          <ng-container matColumnDef="name"><th mat-header-cell *matHeaderCellDef>Etkinlik</th><td mat-cell *matCellDef="let e">{{ e.name }}</td></ng-container>
+          <ng-container matColumnDef="venueName"><th mat-header-cell *matHeaderCellDef>Mekan</th><td mat-cell *matCellDef="let e">{{ e.venueName }}</td></ng-container>
+          <ng-container matColumnDef="startDateTime"><th mat-header-cell *matHeaderCellDef>Tarih</th><td mat-cell *matCellDef="let e">{{ e.startDateTime | date:'dd.MM.yyyy HH:mm' }}</td></ng-container>
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Durum</th>
+            <td mat-cell *matCellDef="let e">
+              <span class="status-chip" [ngClass]="'status-' + e.status.toLowerCase()">{{ getStatusLabel(e.status) }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>İşlem</th>
+            <td mat-cell *matCellDef="let e">
+              <button mat-icon-button color="warn" (click)="delete(e)"><mat-icon>delete</mat-icon></button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+    </mat-card>
+  }
+</div>

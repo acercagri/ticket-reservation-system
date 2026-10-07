@@ -1,0 +1,99 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1>Kullanıcılar</h1>
+    <button mat-raised-button color="primary" (click)="showForm = !showForm">
+      <mat-icon>{{ showForm ? 'close' : 'person_add' }}</mat-icon>
+      {{ showForm ? 'Formu Kapat' : 'Yeni Kullanıcı' }}
+    </button>
+  </div>
+
+  @if (showForm) {
+    <mat-card class="form-card">
+      <mat-card-header><mat-card-title>Yeni Kullanıcı Oluştur</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Kullanıcı Adı</mat-label>
+            <input matInput formControlName="username" />
+            @if (form.get('username')?.hasError('required') && form.get('username')?.touched) {
+              <mat-error>Zorunludur.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>E-posta</mat-label>
+            <input matInput formControlName="email" type="email" />
+            @if (form.get('email')?.hasError('email') && form.get('email')?.touched) {
+              <mat-error>Geçerli e-posta giriniz.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Şifre</mat-label>
+            <input matInput formControlName="password" type="password" />
+            @if (form.get('password')?.hasError('minlength') && form.get('password')?.touched) {
+              <mat-error>En az 6 karakter.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Rol</mat-label>
+            <mat-select formControlName="role">
+              <mat-option value="USER">USER</mat-option>
+              <mat-option value="ADMIN">ADMIN</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div class="form-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || formLoading">
+              Kaydet
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading) {
+    <app-loading-spinner></app-loading-spinner>
+  } @else if (users.length === 0) {
+    <app-empty-state icon="people" title="Kullanıcı yok" message="Henüz kullanıcı oluşturulmamış."></app-empty-state>
+  } @else {
+    <mat-card class="table-card">
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="users">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>#</th>
+            <td mat-cell *matCellDef="let u">{{ u.id }}</td>
+          </ng-container>
+          <ng-container matColumnDef="username">
+            <th mat-header-cell *matHeaderCellDef>Kullanıcı Adı</th>
+            <td mat-cell *matCellDef="let u">{{ u.username }}</td>
+          </ng-container>
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef>E-posta</th>
+            <td mat-cell *matCellDef="let u">{{ u.email }}</td>
+          </ng-container>
+          <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef>Rol</th>
+            <td mat-cell *matCellDef="let u">
+              <span class="role-chip" [ngClass]="u.role === 'ADMIN' ? 'role-admin' : 'role-user'">
+                {{ u.role }}
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Kayıt Tarihi</th>
+            <td mat-cell *matCellDef="let u">{{ u.createdAt | date:'dd.MM.yyyy' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>İşlem</th>
+            <td mat-cell *matCellDef="let u">
+              <button mat-icon-button color="warn" (click)="delete(u)" title="Sil">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+    </mat-card>
+  }
+</div>

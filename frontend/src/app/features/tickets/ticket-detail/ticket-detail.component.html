@@ -1,0 +1,73 @@
+@if (loading) {
+  <app-loading-spinner></app-loading-spinner>
+} @else if (ticket) {
+  <div class="page-container">
+    <a class="back-link" routerLink="/tickets">
+      <mat-icon>arrow_back</mat-icon> Biletlerime Dön
+    </a>
+
+    <div class="ticket-wrapper">
+      <div class="ticket" [class.cancelled]="ticket.status === 'CANCELLED'">
+        <div class="ticket-header">
+          <mat-icon>confirmation_number</mat-icon>
+          <span>TicketApp</span>
+          <div class="status-chip" [ngClass]="'status-' + ticket.status.toLowerCase()">
+            {{ getStatusLabel(ticket.status) }}
+          </div>
+        </div>
+
+        <div class="ticket-content">
+          <div class="event-name">{{ ticket.eventName }}</div>
+
+          <mat-divider class="dashed-divider"></mat-divider>
+
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-label">SIRA</span>
+              <span class="detail-value">{{ ticket.rowName }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">KOLTUK</span>
+              <span class="detail-value">{{ ticket.seatNumber }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">BİLET ID</span>
+              <span class="detail-value">#{{ ticket.id }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">TARİH</span>
+              <span class="detail-value">{{ ticket.createdAt | date:'dd MMM yyyy' }}</span>
+            </div>
+          </div>
+
+          <mat-divider class="dashed-divider"></mat-divider>
+
+          <div class="qr-section">
+            <canvas #qrCanvas [class.hidden]="!qrGenerated"></canvas>
+            @if (!qrGenerated) {
+              <div class="qr-placeholder">
+                <mat-icon>qr_code_2</mat-icon>
+              </div>
+            }
+            <div class="ticket-code">{{ ticket.ticketCode }}</div>
+          </div>
+        </div>
+
+        <div class="ticket-stub">
+          <div class="stub-row">
+            <span class="detail-label">REZERVASYON</span>
+            <span>#{{ ticket.reservationId }}</span>
+          </div>
+          <div class="stub-row">
+            <span class="detail-label">KOLTUK ID</span>
+            <span>#{{ ticket.seatId }}</span>
+          </div>
+          <div class="stub-row">
+            <span class="detail-label">OLUŞTURULMA</span>
+            <span>{{ ticket.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}

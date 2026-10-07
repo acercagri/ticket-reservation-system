@@ -1,0 +1,139 @@
+@if (loading) {
+  <app-loading-spinner></app-loading-spinner>
+} @else if (reservation) {
+  <div class="page-container">
+    <a class="back-link" routerLink="/reservations">
+      <mat-icon>arrow_back</mat-icon> Rezervasyonlarıma Dön
+    </a>
+
+    <div class="detail-header" [ngClass]="'status-bg-' + reservation.status.toLowerCase()">
+      <div class="status-badge" [ngClass]="'status-' + reservation.status.toLowerCase()">
+        {{ getStatusLabel(reservation.status) }}
+      </div>
+      <h1>{{ reservation.eventName }}</h1>
+      <div class="header-meta">
+        <span><mat-icon>tag</mat-icon> Rezervasyon #{{ reservation.id }}</span>
+        <span><mat-icon>person</mat-icon> {{ reservation.userName }}</span>
+      </div>
+    </div>
+
+    <div class="content-grid">
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>Rezervasyon Bilgileri</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="info-row">
+            <span class="label">Rezervasyon Tarihi</span>
+            <span>{{ reservation.reservationDate | date:'dd MMM yyyy, HH:mm' }}</span>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="info-row">
+            <span class="label">Son Ödeme</span>
+            <span>{{ reservation.expiresAt | date:'dd MMM yyyy, HH:mm' }}</span>
+          </div>
+          <mat-divider></mat-divider>
+          <div class="info-row">
+            <span class="label">Toplam Tutar</span>
+            <span class="total-amount">{{ reservation.totalAmount | number:'1.2-2' }} ₺</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      @if (reservation.status === 'PENDING') {
+        <mat-card class="payment-card">
+          <mat-card-header>
+            <mat-card-title>Ödeme</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="countdown-display">
+              <mat-icon>timer</mat-icon>
+              <div>
+                <div class="countdown-time">{{ countdown }}</div>
+                <div class="countdown-label">kalan süre</div>
+              </div>
+            </div>
+            <p class="payment-note">
+              Bu rezervasyon için süre dolmadan ödemenizi tamamlayın.
+              Süre dolarsa rezervasyonunuz otomatik iptal edilir.
+            </p>
+          </mat-card-content>
+          <mat-card-actions>
+            <button
+              mat-raised-button
+              color="primary"
+              class="pay-btn"
+              (click)="pay(true)"
+              [disabled]="paymentLoading"
+            >
+              @if (paymentLoading) {
+                <ng-container><mat-icon>hourglass_empty</mat-icon> İşleniyor...</ng-container>
+              } @else {
+                <ng-container><mat-icon>check_circle</mat-icon> Ödemeyi Tamamla ({{ reservation.totalAmount | number:'1.2-2' }} ₺)</ng-container>
+              }
+            </button>
+            <button
+              mat-stroked-button
+              color="warn"
+              (click)="pay(false)"
+              [disabled]="paymentLoading"
+            >
+              <mat-icon>cancel</mat-icon> Başarısız Ödeme Simüle Et
+            </button>
+            <mat-divider></mat-divider>
+            <button mat-button color="warn" (click)="cancel()" [disabled]="paymentLoading">
+              <mat-icon>delete</mat-icon> Rezervasyonu İptal Et
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
+
+      @if (reservation.status === 'CONFIRMED') {
+        <mat-card class="confirmed-card">
+          <mat-card-content>
+            <div class="confirmed-banner">
+              <mat-icon>check_circle</mat-icon>
+              <div>
+                <h3>Ödeme Tamamlandı!</h3>
+                <p>Biletleriniz oluşturuldu. Biletler sayfasından görüntüleyebilirsiniz.</p>
+              </div>
+            </div>
+          </mat-card-content>
+          <mat-card-actions>
+            <a mat-raised-button color="primary" routerLink="/tickets">
+              <mat-icon>local_activity</mat-icon> Biletlerimi Gör
+            </a>
+          </mat-card-actions>
+        </mat-card>
+      }
+
+      @if (reservation.status === 'EXPIRED') {
+        <mat-card class="expired-card">
+          <mat-card-content>
+            <div class="expired-banner">
+              <mat-icon>schedule</mat-icon>
+              <div>
+                <h3>Süre Doldu</h3>
+                <p>Ödeme süresi geçti. Koltuklar tekrar müsait hale getirildi.</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      @if (reservation.status === 'CANCELLED') {
+        <mat-card class="cancelled-card">
+          <mat-card-content>
+            <div class="cancelled-banner">
+              <mat-icon>cancel</mat-icon>
+              <div>
+                <h3>Rezervasyon İptal Edildi</h3>
+                <p>Bu rezervasyon iptal edilmiş.</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </div>
+}

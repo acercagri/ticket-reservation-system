@@ -1,0 +1,73 @@
+<div class="admin-page">
+  <div class="page-header">
+    <h1>Koltuklar</h1>
+    <button mat-raised-button color="primary" (click)="showForm = !showForm">
+      <mat-icon>{{ showForm ? 'close' : 'add' }}</mat-icon>
+      {{ showForm ? 'Formu Kapat' : 'Yeni Koltuk' }}
+    </button>
+  </div>
+
+  @if (showForm) {
+    <mat-card class="form-card">
+      <mat-card-header><mat-card-title>Yeni Koltuk</mat-card-title></mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Mekan</mat-label>
+            <mat-select formControlName="venueId">
+              @for (v of venues; track v.id) {
+                <mat-option [value]="v.id">{{ v.name }} – {{ v.city }}</mat-option>
+              }
+            </mat-select>
+            @if (form.get('venueId')?.hasError('required') && form.get('venueId')?.touched) {
+              <mat-error>Zorunludur.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Sıra Adı</mat-label>
+            <input matInput formControlName="rowName" placeholder="A, B, C..." />
+            @if (form.get('rowName')?.hasError('required') && form.get('rowName')?.touched) {
+              <mat-error>Zorunludur.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Koltuk Numarası</mat-label>
+            <input matInput type="number" formControlName="seatNumber" min="1" />
+            @if (form.get('seatNumber')?.hasError('min') && form.get('seatNumber')?.touched) {
+              <mat-error>Pozitif sayı olmalıdır.</mat-error>
+            }
+          </mat-form-field>
+          <div class="form-actions">
+            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || formLoading">Kaydet</button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  @if (loading) {
+    <app-loading-spinner></app-loading-spinner>
+  } @else if (seats.length === 0) {
+    <app-empty-state icon="event_seat" title="Koltuk yok" message="Henüz koltuk oluşturulmamış."></app-empty-state>
+  } @else {
+    <mat-card class="table-card">
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="seats">
+          <ng-container matColumnDef="id"><th mat-header-cell *matHeaderCellDef>#</th><td mat-cell *matCellDef="let s">{{ s.id }}</td></ng-container>
+          <ng-container matColumnDef="rowName"><th mat-header-cell *matHeaderCellDef>Sıra</th><td mat-cell *matCellDef="let s">{{ s.rowName }}</td></ng-container>
+          <ng-container matColumnDef="seatNumber"><th mat-header-cell *matHeaderCellDef>No</th><td mat-cell *matCellDef="let s">{{ s.seatNumber }}</td></ng-container>
+          <ng-container matColumnDef="venueName"><th mat-header-cell *matHeaderCellDef>Mekan</th><td mat-cell *matCellDef="let s">{{ s.venueName }}</td></ng-container>
+          <ng-container matColumnDef="createdAt"><th mat-header-cell *matHeaderCellDef>Tarih</th><td mat-cell *matCellDef="let s">{{ s.createdAt | date:'dd.MM.yyyy' }}</td></ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>İşlem</th>
+            <td mat-cell *matCellDef="let s">
+              <button mat-icon-button color="warn" (click)="delete(s)"><mat-icon>delete</mat-icon></button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+    </mat-card>
+  }
+</div>
